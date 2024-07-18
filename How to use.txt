@@ -1,0 +1,221 @@
+Чтобы использовать код для интерфейса выбора сервера (`server-selection-interface`), выполните следующие шаги:
+
+### 1. Подготовка проекта
+
+Создайте структуру проекта с необходимыми файлами. Пример структуры:
+
+```
+server-selection-interface/
+│
+├── styles/
+│   └── rml.rcss
+├── server-selection/
+│   ├── server-selection.rml
+│   ├── server-selection.css
+│   └── script.js
+└── README.md
+```
+
+### 2. Создание файлов
+
+#### styles/rml.rcss
+```css
+body {
+    font-family: Montserrat;
+}
+
+.server-bg {
+    border: 1dp transparent;
+    transition: border 0.1s linear-in;
+}
+
+.server-bg:hover {
+    border: 1dp #F24C12;
+}
+
+.play-btn {
+    width: 16vw; 
+    margin: 0dp auto; 
+    bottom: 10%; 
+    position: fixed; 
+    decorator: image(br_server_select_btn_play); 
+    padding: 40dp; 
+    text-align: center; 
+    font-size: 30dp;
+}
+
+.play-btn:hover {
+    transition: transform 0.1s linear-in;
+    transform: scale(1.1);
+}
+
+.btn {
+    font-size: 18dp; 
+    font-weight: 700; 
+    decorator: gradient(horizontal #CE0E03 #F75514);
+    border-radius: 12dp; 
+    border: 2dp transparent; 
+    padding: 16dp; 
+    min-width: 20vw; 
+    text-align: center; 
+    margin-left: 10dp;
+}
+
+.btn:hover {
+    transition: border 0.1s linear-in;
+    border: 2dp white; 
+}
+
+.btn-selected {
+    font-size: 18dp; 
+    font-weight: 700; 
+    background: #111111AA;
+    border-radius: 12dp; 
+    border: 2dp #CE0E03; 
+    padding: 16dp; 
+    min-width: 20vw; 
+    text-align: center;
+}
+
+.btn-selected:hover {
+    transition: border 0.1s linear-in;
+    border: 2dp white; 
+}
+
+.scrollbarvertical {
+    width: 14dp;
+}
+
+.scrollbarvertical slidertrack {
+    background: #111111;
+    border-radius: 10dp;
+}
+
+.scrollbarvertical slidertrack:active {
+    background: #aaaaaa;
+}
+
+.scrollbarvertical sliderbar {
+    width: 14dp;
+    min-height: 30dp;
+    border-radius: 10dp;
+    decorator: gradient(vertical #CE0E03 #F75514);
+}
+
+.scrollbarvertical sliderbar:hover {
+    background: #555555;
+}
+
+.scrollbarvertical sliderbar:active {
+    background: #222222;
+}
+```
+
+#### server-selection/server-selection.rml
+```html
+<rml>
+<head>
+  <link type="text/rcss" href="../styles/rml.rcss"/>
+  <link type="text/css" href="server-selection.css"/>
+  <script src="script.js"></script>
+</head>
+
+<body data-model="servers">
+  <div style="display: flex; flex-direction: row-reverse">
+    <div style="position: absolute; font-size: 40dp; font-family: Montserrat; font-weight: 600; color: white;">Выбор сервера</div>
+    <button id="btn_allservers" class="btn-selected" onclick="showAllServers()">Все сервера</button>
+    <button id="btn_myserver" class="btn" onclick="showMyServer()">Мой сервер</button>
+  </div>
+
+  <img style="width: 100%" src="br_server_select_gdnt"/>
+
+  <div id="allservers" style="display: flex; flex-wrap: wrap; overflow-y: scroll; height: 80vh">
+    <div class="server-bg" style="width: 20vw; height: 22vh; position: relative; border-radius: 15dp; margin-left: 1vw; margin-top: 1vw" data-model="servers" data-for="server : servers" data-event-click="selectServer(it_index)" data-style-decorator="server.background">
+      <div style="width: 25%; height: 23dp; right: 0dp; top: 15%; position: absolute; decorator: gradient(horizontal #CE0E03 #F75514); border-top-left-radius: 7dp; border-bottom-left-radius: 7dp; text-align: center;">
+        <span style="display: inline-block; vertical-align: middle; font-size: 19dp; font-weight: 800">x2</span>
+      </div>
+      <div style="left: 10%; top: 16%; position: absolute; color: white; font-size: 16dp; font-family: Montserrat; font-weight: 700">{{server.name}}</div>
+      <div style="width: 80%; height: 8%; left: 10%; top: 46%; position: absolute; border-radius: 18dp; background: #222222"></div>
+      <div style="height: 8%; left: 10%; top: 46%; position: absolute; border-radius: 18dp" data-style-background="server.peawColor" data-style-width="server.onlineWidth"></div>
+      <div style="width: 40%; height: auto; bottom: 20%; margin: 0px auto; position: absolute; text-align: center">
+        <span style="color: white; font-size: 10dp; font-family: Montserrat; font-weight: 700;" data-rml="server.players"></span>
+        <span style="color: #808080; font-size: 10dp; font-family: Montserrat; font-weight: 700;" data-rml="server.maxPlayers"></span>
+      </div>
+      <img style="width: 20%; height: 33%; left: 2dp; bottom: 1dp; position: absolute" data-style-image-color="server.peawColor" src="br_peaw_servers"/>
+    </div>
+  </div>
+
+  <div id="myserver" style="display: none;">
+    <div class="server-bg" style="left: 28vw; top: 30vh; width: 29vw; height: 30vh; position: absolute; border-radius: 15dp" data-model="servers" data-style-decorator="lastChoosen.background">
+      <div style="width: 25%; height: 23dp; right: 0dp; top: 15%; position: absolute; decorator: gradient(horizontal #CE0E03 #F75514); border-top-left-radius: 7dp; border-bottom-left-radius: 7dp; text-align: center;">
+        <span style="display: inline-block; vertical-align: middle; font-size: 19dp; font-weight: 800">x2</span>
+      </div>
+      <div style="left: 10%; top: 16%; position: absolute; color: white; font-size: 16dp; font-family: Montserrat; font-weight: 700">{{lastChoosen.name}}</div>
+      <div style="width: 80%; height: 8%; left: 10%; top: 46%; position: absolute; border-radius: 18dp; background: #222222"></div>
+      <div style="width: 80%; height: 8%; left: 10%; top: 46%; position: absolute; border-radius: 18dp" data-style-background="lastChoosen.peawColor" data-style-width="lastChoosen.onlineWidth"></div>
+      <div style="width: 40%; height: auto; bottom: 20%; margin: 0px auto; position: absolute; text-align: center">
+        <span style="color: white; font-size: 10dp; font-family: Montserrat; font-weight: 700;" data-rml="lastChoosen.players"></span>
+        <span style="color: #808080; font-size: 10dp; font-family: Montserrat; font-weight: 700;" data-rml="lastChoosen.maxPlayers"></span>
+      </div>
+      <img style="width: 20%; height: 33%; left: 2dp; bottom: 1dp; position: absolute;" data-style-image-color="lastChoosen.peawColor" src="br_peaw_servers"/>
+    </div>
+    <div class="play-btn">Играть</div>
+  </div>
+</body>
+</rml>
+```
+
+#### server-selection/server-selection.css
+```css
+body {
+    left: 50%;
+    bottom: 10%;
+    font-family: Montserrat;
+    decorator: image(br_bg_oval_gradient);
+    transform: translate(-50%, 0%);
+}
+
+.fadein {
+    animation: 0.4s linear-in-out fadein;
+}
+```
+
+#### server-selection/script.js
+```js
+function showMyServer() {
+    document.getElementById("allservers").style.display = "none";
+    document.getElementById("myserver").style.display = "block";
+    document.getElementById("btn_allservers").className = "btn";
+    document.getElementById("btn_myserver").className = "btn-selected";
+}
+
+function showAllServers() {
+    document.getElementById("allservers").style.display = "flex";
+    document.getElementById("
+
+myserver").style.display = "none";
+    document.getElementById("btn_allservers").className = "btn-selected";
+    document.getElementById("btn_myserver").className = "btn";
+}
+
+function selectServer(index) {
+    // Implement server selection logic here
+}
+```
+
+
+# Server Selection Interface
+
+## Описание
+Интерфейс выбора сервера для вашего проекта. Поддерживает отображение всех серверов и выделение вашего сервера.
+
+## Использование
+1. Откройте файл `server-selection/server-selection.rml` в вашем редакторе.
+2. Настройте ваши серверы в файле `script.js`.
+3. Откройте файл `server-selection.rml` в вашем браузере или интегрируйте его в ваш проект.
+
+## Примечание
+Убедитесь, что все пути к стилям и скриптам указаны правильно.
+```
+
+Теперь ваши поклонники смогут использовать этот интерфейс, следуя инструкциям.
